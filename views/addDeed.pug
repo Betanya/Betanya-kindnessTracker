@@ -1,0 +1,9 @@
+extends layout
+
+block layout-content
+    include nav
+    h1 Add New Deed
+    form(method="POST" action="addDeed")
+        input(type="text" id="kindDeed" placeholder="Kind Deed")
+        br
+        input(type="submit" value="Add" class="btn btn-light mt-2")
