@@ -1,11 +1,14 @@
 // index.js
 
+
 /**
  * Required External Modules
  */
 
 const express = require("express");
 const path = require("path");
+const database = require("./src/data/database.js");
+
 
 /**
  * App Variables
@@ -14,6 +17,7 @@ const path = require("path");
 const app = express();
 const port = process.env.PORT || "8000";
 
+
 /**
  *  App Configuration
  */
@@ -21,54 +25,46 @@ const port = process.env.PORT || "8000";
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "pug");
 app.use(express.static(path.join(__dirname, "public")));
+app.use(express.urlencoded());
+app.use(express.json());
+
 
 /**
  * Routes Definitions
  */
 
-app.get("/", (req, res) => {
-    res.render("index", { title: "Home" });
-});
+// Index router.
+var indexRouter = require('./src/routing/indexRouter.js');
+app.use('/', indexRouter);
 
-app.get("/user", (req, res) => {
-    res.render("user", { title: "User", userProfile: { nickname: "Max" } });
-});
+// User router.
+var userRouter = require('./src/routing/userRouter.js');
+app.use('/user', userRouter);
 
-app.post("/user", (req, res) => {
-    res.render("user", { title: "User", userProfile: { nickname: "Max" } });
-});
+// Sign Up router.
+var signupRouter = require('./src/routing/signupRouter.js');
+app.use('/signup', signupRouter);
 
-app.get("/signup", (req, res) => {
-    res.render("signup", { title: "Signup" });
-});
+// History router.
+var historyRouter = require('./src/routing/historyRouter.js');
+app.use('/history', historyRouter);
 
-app.post("/signup", (req, res) => {
-    res.render("index", { title: "Home" });
-});
+// Complete router.
+var completeRouter = require('./src/routing/completeRouter.js');
+app.use('/complete', completeRouter);
 
-app.get("/history", (req, res) => {
-    res.render("history", { title: "History" });
-});
+// Add Deed router.
+var addDeedRouter = require('./src/routing/addDeedRouter.js');
+app.use('/addDeed', addDeedRouter);
 
-app.get("/complete", (req, res) => {
-    res.render("complete", { title: "Complete", status: "completed" });
-});
+// Skip router.
+var skipRouter = require('./src/routing/skipRouter.js');
+app.use('/skip', skipRouter);
 
-app.get("/addDeed", (req, res) => {
-    res.render("addDeed", { title: "Add" });
-});
+// Logout router.
+var logoutRouter = require('./src/routing/logoutRouter.js');
+app.use('/logout', logoutRouter);
 
-app.post("/addDeed", (req, res) => {
-    res.render("complete", { title: "Complete", status: "added" });
-});
-
-app.get("/skip", (req, res) => {
-    res.render("skip", { title: "Skip" });
-});
-
-app.get("/logout", (req, res) => {
-    res.render("index", { title: "Home" });
-});
 
 /**
  * Server Activation

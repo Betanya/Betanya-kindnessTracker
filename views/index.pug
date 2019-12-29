@@ -4,10 +4,10 @@ block layout-content
     h1 Kindness Tracker
     form(method="POST" action="user")
         label(for="username") Username:
-        input#username(type="text" required placeholder="Enter username...")
+        input#username(type="text" name="username" required placeholder="Enter username...")
         br
         label(for="password") Password:
-        input#password(type="password" required placeholder="Enter password...")
+        input#password(type="password" name="password" required placeholder="Enter password...")
         br
         input(type="submit" value="Login")
     div
