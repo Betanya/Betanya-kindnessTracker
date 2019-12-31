@@ -1,9 +1,10 @@
 extends layout
 
 block layout-content
-	include nav
-	script(src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.6/d3.min.js" charset="utf-8")
+	script(type="text/javascript" src="//d3js.org/d3.v3.min.js")
 	script(src="cal-heatmap.min.js")
+	link(rel="stylesheet" type="text/css" href="cal-heatmap.css")
+	include nav
 	h1 History of Kindness
 	p Heatmap of all the completed good deeds
 	div(id="cal-heatmap")
