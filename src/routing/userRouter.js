@@ -53,45 +53,8 @@ router.post('', function (req, res) {
             let user = results.Items[0];
             console.log("User: " + JSON.stringify(user));
             res.render("user", { title: "User", user: user, message: "" });
-        }
-
-        // if ({
-        //     console.log("users::docClient.scan::success::data - " + JSON.stringify(data));
-        // }
-
-        // if (Object.keys(data).length === 0) {
-        //     
-        // }
-        // else {
-        //     if (data.Item.password === password) {
-        //         
-        //         docClient.get(params, function (err, data) { 
-
-        //         });
-        //     } else {
-        //         console.log("users::verifyUserLogin::success::invalidPassword - " + JSON.stringify(data, null, 2));
-        //         return 'Invalid Password';
-        //     }    
+        }  
     });
-
-        // console.log("After verifyUserLogin");
-        // console.log("Verification: " + verification);
-
-        // if (verification === true) {
-        //     console.log("Before getUser");
-        //     user = database.getUser(user);
-        //     console.log("After getUser");
-        //     console.log("User:" + user);
-        //     console.log("Before render user that exists and is valid.");
-        //    
-        // } else if (verification === false) {
-        //     res.render("signup", { title: "Signup", message: "Please sign up."});
-        // } else if (verification === 'Invalid Password') {
-        //     res.render("index", { title: "Index", message: "Invalid Password" });
-        // } else {
-        //     res.render("index", { title: "Index", message: verification });
-        // }
-        // console.log("After res.render.");
 });
 
 module.exports = router;
