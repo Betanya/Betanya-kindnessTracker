@@ -8,3 +8,8 @@ router.get('', function (req, res) {
 })
 
 module.exports = router;
+
+// const addUser = (ev) => {
+//     ev.preventDefault();  //to stop the form submitting
+//     
+    

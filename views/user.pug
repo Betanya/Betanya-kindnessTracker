@@ -2,7 +2,7 @@ extends layout
 
 block layout-content
     include nav
-    h1 Welcome, #{userProfile.nickname}!
+    h1 Welcome, #{user.firstname}!
     p.mt-2 Clean their dishes
     button(type="button" class="btn btn-light mt-2")
         a(href="/complete") Deed complete!
