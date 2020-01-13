@@ -2,59 +2,43 @@
 
 var express = require('express');
 var router = express.Router();
-//var database = require("../data/database.js");
-var AWS = require("aws-sdk");
-var access = require("../data/access.json");
-
-let awsConfig = {
-    "region": "us-east-2",
-    "endpoint": "http://dynamodb.us-east-2.amazonaws.com",
-    "accessKeyId": access.accessKeyId, 
-    "secretAccessKey": access.secretAccessKey
-};
-
-AWS.config.update(awsConfig);
-let docClient = new AWS.DynamoDB.DocumentClient();
+var database = require("../data/database.js");
 
 router.get('', function (req, res) {
-    res.render("user", { title: "User", userProfile: { nickname: "Max" } });
+    let user = {
+        firstname: "test"
+    };
+    res.render("user", { title: "User", user: user, message: "" });
 });
 
-router.post('', function (req, res) {
+router.post('', async function (req, res) {
     console.log("Inside post request");
     let username = req.body.username;
     let password = req.body.password;
     console.log("Username: " + username + " | Password: " + password);
 
-    var params = {
-        TableName: "users",
-        FilterExpression: "username = :username and password = :password",
-        ExpressionAttributeValues: {
-            ":username": username,
-            ":password": password
-        }
-    };
+    try {
+        let usernameExists = await database.checkUsername(username);
 
-    docClient.scan(params, function (err, data) {
-        console.log("Inside docClient.scan callback.");
-        if (err) {
-            console.log("users::docClient.scan::error - " + err);
-            throw err;
-        }
-        
-        let dataStringified = JSON.stringify(data);
-        let results = JSON.parse(dataStringified);
+        if (usernameExists) {
+            let validPassword = await database.checkPassword(username, password);
 
-        if (results.Count === 0) {
-            console.log("users::docClient.scan::success::NULL_DATA - " + dataStringified);
-            res.render("index", { title: "Index", message: "Username or password is invalid. If you do not have an account, please click the Sign Up button below."});
-        } else  {
-            console.log("users::docClient.scan::success::VALID_USER - " + dataStringified);
-            let user = results.Items[0];
-            console.log("User: " + JSON.stringify(user));
-            res.render("user", { title: "User", user: user, message: "" });
-        }  
-    });
+            if (validPassword) {
+                let user = await database.getUser(username);
+                console.log("users::docClient.scan::success::VALID_USER - " + JSON.stringify(user));
+                res.render("user", { title: "User", user: user, message: "" });
+            } else {
+                console.log("users::docClient.scan::success::INCORRECT_PASSWORD");
+                res.render("index", { title: "Index", message: "Password is invalid."});
+            }
+        } else {
+            console.log("users::docClient.scan::success::INCORRECT_USERNAME");
+            res.render("index", { title: "Index", message: "Username is invalid."});
+        }
+    } catch (ex) {
+        console.log("users::docClient.scan::success::ERROR_ERROR_ERROR");
+        res.render("index", { title: "Index", message: "ERROR. CONTACT DEVELOPER."});
+    }
 });
 
 module.exports = router;

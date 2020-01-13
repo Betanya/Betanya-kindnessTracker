@@ -13,90 +13,145 @@ let awsConfig = {
     "accessKeyId": access.accessKeyId, 
     "secretAccessKey": access.secretAccessKey
 };
+
 AWS.config.update(awsConfig);
 let docClient = new AWS.DynamoDB.DocumentClient();
 
-function login(username, password, callback) {
-    console.log("Inside verifyUserLogin");
-    var params = {
-        TableName: "users",
-        Key: {
-            "username": username
-        }
-    };
-    docClient.get(params, function (err, data) {
-        if (err) {
-            console.log("users::verifyUserLogin::error - " + JSON.stringify(err, null, 2));
-            return err;
-        }
+function checkUsername(username) {
+    return new Promise((resolve, reject) => {
+        console.log("Inside checkUsername");
+        var params = {
+            TableName: "users",
+            FilterExpression: "username = :username",
+            ExpressionAttributeValues: {
+                ":username": username
+            }
+        };
 
-        if (Object.keys(data).length === 0) {
-            console.log("users::verifyUserLogin::success::nullData - " + JSON.stringify(err, null, 2));
-            return false;
-        }
-        else {
-            if (data.Item.password === password) {
-                console.log("users::verifyUserLogin::success::validUser - " + JSON.stringify(data, null, 2));
-                return true;
+        docClient.scan(params, function (err, data) {
+            console.log("Inside docClient.scan callback.");
+            if (err) {
+                console.log("users::docClient.scan::ERROR - " + err);
+                reject();
             } else {
-                console.log("users::verifyUserLogin::success::invalidPassword - " + JSON.stringify(data, null, 2));
-                return 'Invalid Password';
-            }    
-        }
+                let results = JSON.parse(JSON.stringify(data));
+                if (results.Count === 0) {
+                    resolve(false);
+                } else {
+                    resolve(true);
+                }
+            }
+        });
     });
 }
 
-//module.exports.verifyUserLogin = verifyUserLogin;
-// {
-//     verifyUserLogin: async function (username, password) {
-//         console.log("Inside verifyUserLogin");
-//         var params = {
-//             TableName: "users",
-//             Key: {
-//                 "username": username
-//             }
-//         };
-//         docClient.get(params, function (err, data) {
-//             if (err) {
-//                 console.log("users::verifyUserLogin::error - " + JSON.stringify(err, null, 2));
-//                 return err;
-//             }
+function checkPassword(username, password) {
+    return new Promise((resolve, reject) => {
+        console.log("Inside checkPassword");
+        var params = {
+            TableName: "users",
+            FilterExpression: "username = :username and password = :password",
+            ExpressionAttributeValues: {
+                ":username": username,
+                ":password": password
+            }
+        };
 
-//             if (Object.keys(data).length === 0) {
-//                 console.log("users::verifyUserLogin::success::nullData - " + JSON.stringify(err, null, 2));
-//                 return false;
-//             }
-//             else {
-//                 if (data.Item.password === password) {
-//                     console.log("users::verifyUserLogin::success::validUser - " + JSON.stringify(data, null, 2));
-//                     return true;
-//                 } else {
-//                     console.log("users::verifyUserLogin::success::invalidPassword - " + JSON.stringify(data, null, 2));
-//                     return 'Invalid Password';
-//                 }    
-//             }
-//         });
-//     },
+        docClient.scan(params, function (err, data) {
+            console.log("Inside docClient.scan callback.");
+            if (err) {
+                console.log("users::docClient.scan::ERROR - " + err);
+                reject();
+            } else {
+                let results = JSON.parse(JSON.stringify(data));
+                if (results.Count === 0) {
+                    resolve(false);
+                } else {
+                    resolve(true);
+                }
+            }
+        });
+    });
+}
 
-//     getUser: function(username) {
-//         var params = {
-//             TableName: "users",
-//             Key: {
-//                 "username": username
-//             }
-//         };
-//         docClient.get(params, function (err, data) {
-//             if (err) {
-//                 console.log("users::getUser::error - " + JSON.stringify(err, null, 2));
-//                 throw err;
-//             }
-//             else {
-//                 data = JSON.stringify(data, null, 2);
-//                 console.log("users::getUser::success - " + data);
-//                 return data;
-//             }
-//         });
-//     },
+function getUser(username) {
+    return new Promise((resolve, reject) => {
+        console.log("Inside getUser");
+        var params = {
+            TableName: "users",
+            Key: {
+                username: username
+            }
+        };
+
+        docClient.get(params, function (err, data) {
+            console.log("Inside docClient.scan callback.");
+            if (err) {
+                console.log("users::docClient.scan::ERROR - " + err);
+                reject();
+            } else {
+                let user = JSON.parse(JSON.stringify(data)).Item;
+                resolve(user);
+            }
+        });
+    });
+}
+
+function signUp(user) {
+    return new Promise((resolve, reject) => {
+        console.log("Inside signUp");
+        
+        var input = {
+            "username": user.username, 
+            "email": user.email, 
+            "firstname": user.firstname,
+            "lastname": user.lastname, 
+            "password": user.password
+        };
+
+        var params = {
+            TableName: "users",
+            Item: user
+        };
+
+        docClient.put(params, function (err, data) {
+            if (err) {
+                console.log("users::put::ERROR - " + JSON.stringify(err, null, 2));
+                reject(err);                
+            } else {
+                console.log("users::put::SUCCESS");
+                resolve("SUCCESS");                 
+            }
+        });
+
+        // var params = {
+        //     TableName: "users",
+        //     Key: {
+        //         username: username
+        //     }
+        // };
+
+        // docClient.get(params, function (err, data) {
+        //     console.log("Inside docClient.scan callback.");
+        //     if (err) {
+        //         console.log("users::docClient.scan::ERROR - " + err);
+        //         reject();
+        //     } else {
+        //         let user = JSON.parse(JSON.stringify(data)).Item;
+        //         resolve(user);
+        //     }
+        // });
+    });
+}
+
+module.exports = {
+    checkUsername: checkUsername,
+    checkPassword: checkPassword,
+    getUser: getUser,
+    signUp: signUp
+};
+
+
 
 //     deleteFromDb: function () {
 //         var params = {
@@ -156,3 +211,6 @@ function login(username, password, callback) {
 //         });
 //     }
 // };
+
+
+//            let user = results.Items[0];

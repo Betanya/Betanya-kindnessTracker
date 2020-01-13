@@ -3,18 +3,22 @@ extends layout
 block layout-content
     h1 Sign Up
     form(method="POST" action="signup")
-        label(for="firstname") First Name:
-        input#firstname(type="text" required placeholder="Enter first name...")
-        br
         label(for="username") Username:
-        input#username(type="text" required placeholder="Enter username...")
-        br
-        label(for="password") Password:
-        input#password(type="password" required placeholder="Enter password...")
+        input#username(type="text" name="username" required placeholder="Enter username...")
         br
         label(for="email") Email:
-        input#email(type="email" required placeholder="Enter email...")
+        input#email(type="email" name="email" required placeholder="Enter email...")
         br
+        label(for="firstname") First Name:
+        input#firstname(type="text" name="firstname" required placeholder="Enter first name...")
+        br
+        label(for="lastname") Last Name:
+        input#lastname(type="text" name="lastname" required placeholder="Enter last name...")
+        br
+        label(for="password") Password:
+        input#password(type="password" name="password" required placeholder="Enter password...")
+        br
+        
         input(type="submit" value="Sign Up")
     div
         p #{message}
