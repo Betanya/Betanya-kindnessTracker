@@ -12,7 +12,7 @@ router.get('', function (req, res) {
 });
 
 router.post('', async function (req, res) {
-    console.log("Inside post request");
+    console.log("Inside userRouter post request");
     let username = req.body.username;
     let password = req.body.password;
     console.log("Username: " + username + " | Password: " + password);
@@ -25,18 +25,16 @@ router.post('', async function (req, res) {
 
             if (validPassword) {
                 let user = await database.getUser(username);
-                console.log("users::docClient.scan::success::VALID_USER - " + JSON.stringify(user));
-                res.render("user", { title: "User", user: user, message: "" });
+                console.log("userRouter.post::try-catch::VALID_USER: \n" + JSON.stringify(user));
+                res.render("user", { title: "User", user: user });
             } else {
-                console.log("users::docClient.scan::success::INCORRECT_PASSWORD");
                 res.render("index", { title: "Index", message: "Password is invalid."});
             }
         } else {
-            console.log("users::docClient.scan::success::INCORRECT_USERNAME");
             res.render("index", { title: "Index", message: "Username is invalid."});
         }
     } catch (ex) {
-        console.log("users::docClient.scan::success::ERROR_ERROR_ERROR");
+        console.log("userRouter.post::try-catch::ERROR_THROWN");
         res.render("index", { title: "Index", message: "ERROR. CONTACT DEVELOPER."});
     }
 });

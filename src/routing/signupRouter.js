@@ -21,13 +21,17 @@ router.post('', async function (req, res) {
         password: req.body.password
     };
 
+    console.log("Form Data:")
     console.log("Username: " + user.username + " | Email: " + user.email + " | Firstname: " + user.firstname + " | Lastname: " + user.lastname + " | Password: " + user.password);
 
     let status = await database.signUp(user);
+
     if (status === "SUCCESS") {
         res.render("index", { title: "Home", message: "Signup successful. Please login." });
+    } else if (status === "ALREADY_EXISTS") {
+        res.render("signup", { title: "Home", message: "Username already exists." });
     } else {
-        res.render("index", { title: "Home", message: "Signup unsuccessful. Please contact developers." });
+        res.render("index", { title: "Home", message: "Signup failed. Please contact developers." });
     }
 });
 

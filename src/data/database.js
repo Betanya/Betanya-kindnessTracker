@@ -5,7 +5,7 @@ var AWS = require("aws-sdk");
 var access = require("../data/access.json");
 
 // Will be used to safely store passwords
-// var hash = require("")
+// var password = require("../util/password.js")
 
 let awsConfig = {
     "region": "us-east-2",
@@ -29,15 +29,17 @@ function checkUsername(username) {
         };
 
         docClient.scan(params, function (err, data) {
-            console.log("Inside docClient.scan callback.");
+            console.log("Inside checkUsername docClient.scan callback.");
             if (err) {
-                console.log("users::docClient.scan::ERROR - " + err);
+                console.log("checkUsername::users::docClient.scan::ERROR - " + err);
                 reject();
             } else {
                 let results = JSON.parse(JSON.stringify(data));
                 if (results.Count === 0) {
+                    console.log("checkUsername::users::docClient.scan::success::INCORRECT_USERNAME");
                     resolve(false);
                 } else {
+                    console.log("checkUsername::users::docClient.scan::success::USERNAME_EXISTS");
                     resolve(true);
                 }
             }
@@ -58,15 +60,17 @@ function checkPassword(username, password) {
         };
 
         docClient.scan(params, function (err, data) {
-            console.log("Inside docClient.scan callback.");
+            console.log("Inside checkPassword docClient.scan callback.");
             if (err) {
-                console.log("users::docClient.scan::ERROR - " + err);
+                console.log("checkPassword::users::docClient.scan::ERROR - " + err);
                 reject();
             } else {
                 let results = JSON.parse(JSON.stringify(data));
                 if (results.Count === 0) {
+                    console.log("checkPassword::users::docClient.scan::success::INCORRECT_PASSWORD");
                     resolve(false);
                 } else {
+                    console.log("checkPassword::users::docClient.scan::success::VALID_PASSWORD");
                     resolve(true);
                 }
             }
@@ -85,9 +89,9 @@ function getUser(username) {
         };
 
         docClient.get(params, function (err, data) {
-            console.log("Inside docClient.scan callback.");
+            console.log("Inside getUser docClient.get callback.");
             if (err) {
-                console.log("users::docClient.scan::ERROR - " + err);
+                console.log("getUser::users::docClient.get::ERROR - " + err);
                 reject();
             } else {
                 let user = JSON.parse(JSON.stringify(data)).Item;
@@ -98,49 +102,30 @@ function getUser(username) {
 }
 
 function signUp(user) {
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
         console.log("Inside signUp");
-        
-        var input = {
-            "username": user.username, 
-            "email": user.email, 
-            "firstname": user.firstname,
-            "lastname": user.lastname, 
-            "password": user.password
-        };
 
         var params = {
             TableName: "users",
             Item: user
         };
 
-        docClient.put(params, function (err, data) {
-            if (err) {
-                console.log("users::put::ERROR - " + JSON.stringify(err, null, 2));
-                reject(err);                
-            } else {
-                console.log("users::put::SUCCESS");
-                resolve("SUCCESS");                 
-            }
-        });
+        let usernameExists = await checkUsername(user.username);
 
-        // var params = {
-        //     TableName: "users",
-        //     Key: {
-        //         username: username
-        //     }
-        // };
-
-        // docClient.get(params, function (err, data) {
-        //     console.log("Inside docClient.scan callback.");
-        //     if (err) {
-        //         console.log("users::docClient.scan::ERROR - " + err);
-        //         reject();
-        //     } else {
-        //         let user = JSON.parse(JSON.stringify(data)).Item;
-        //         resolve(user);
-        //     }
-        // });
+        if (usernameExists) {
+            resolve("ALREADY_EXISTS");
+        } else {
+            docClient.put(params, function (err) {
+                console.log("Inside signUp docClient.put callback.");
+                if (err) {
+                    console.log("signUp::users::docClient.put::ERROR - " + JSON.stringify(err, null, 2));
+                    reject(err);                
+                } else {
+                    console.log("signUp::users::docClient.put::SUCCESS");
+                    resolve("SUCCESS");                 
+                }
+            });
+        }
     });
 }
 
@@ -150,67 +135,3 @@ module.exports = {
     getUser: getUser,
     signUp: signUp
 };
-
-
-
-//     deleteFromDb: function () {
-//         var params = {
-//             TableName: "users",
-//             Key: {
-//                 "email_id": "email@gmail.com"
-//             }
-//         };
-//         docClient.delete(params, function (err, data) {
-    
-//             if (err) {
-//                 console.log("users::delete::error - " + JSON.stringify(err, null, 2));
-//             } else {
-//                 console.log("users::delete::success");
-//             }
-//         });
-//     },
-
-//     updateInDatabase: function () {
-//         var params = {
-//             TableName: "users",
-//             Key: { "email_id": "example-1@gmail.com" },
-//             UpdateExpression: "set updated_by = :byUser, is_deleted = :boolValue",
-//             ExpressionAttributeValues: {
-//                 ":byUser": "updateUser",
-//                 ":boolValue": true
-//             },
-//             ReturnValues: "UPDATED_NEW"
-    
-//         };
-//         docClient.update(params, function (err, data) {
-    
-//             if (err) {
-//                 console.log("users::update::error - " + JSON.stringify(err, null, 2));
-//             } else {
-//                 console.log("users::update::success "+JSON.stringify(data) );
-//             }
-//         });
-//     },
-
-//     createInDatabase: function () {
-//         var input = {
-//             "email_id": "example-1@gmail.com", "created_by": "clientUser", "created_on": new Date().toString(),
-//             "updated_by": "clientUser", "updated_on": new Date().toString(), "is_deleted": false
-//         };
-//         var params = {
-//             TableName: "users",
-//             Item:  input
-//         };
-//         docClient.put(params, function (err, data) {
-    
-//             if (err) {
-//                 console.log("users::save::error - " + JSON.stringify(err, null, 2));                      
-//             } else {
-//                 console.log("users::save::success" );                      
-//             }
-//         });
-//     }
-// };
-
-
-//            let user = results.Items[0];
