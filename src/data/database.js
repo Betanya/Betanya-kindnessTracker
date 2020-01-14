@@ -129,9 +129,42 @@ function signUp(user) {
     });
 }
 
+function getIncompleteDeeds(username) {
+    return new Promise((resolve, reject) => {
+        console.log("Inside getIncompleteDeeds");
+        var params = {
+            TableName: "deeds",
+            FilterExpression: "username = :username and completed = :completed",
+            ExpressionAttributeValues: {
+                ":username": username,
+                ":completed": false
+            }
+        };
+
+        docClient.scan(params, function (err, data) {
+            console.log("Inside getIncompleteDeeds docClient.scan callback.");
+            if (err) {
+                console.log("getIncompleteDeeds::deeds::docClient.scan::ERROR - " + err);
+                reject();
+            } else {
+                console.log("getIncompleteDeeds::rawData - " + JSON.stringify(data));
+                let results = JSON.parse(JSON.stringify(data));
+                if (results.Count === 0) {
+                    console.log("getIncompleteDeeds::deeds::docClient.scan::success::NO_INCOMPLETE_DEEDS");
+                    resolve(false);
+                } else {
+                    console.log("getIncompleteDeeds::deeds::docClient.scan::success::INCOMPLETE_DEEDS_EXIST");
+                    resolve(results.Items);
+                }
+            }
+        });
+    });
+}
+
 module.exports = {
     checkUsername: checkUsername,
     checkPassword: checkPassword,
     getUser: getUser,
-    signUp: signUp
+    signUp: signUp,
+    getIncompleteDeeds: getIncompleteDeeds
 };

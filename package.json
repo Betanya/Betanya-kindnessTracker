@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon ./index.js",
+    "dev": "nodemon ./app.js",
     "ui": "browser-sync start --proxy=localhost:8000 --files='**/*.css, **/*.pug, **/*.js' --ignore=node_modules --reload-delay 10 --no-ui --no-notify"
   },
   "keywords": [],
@@ -12,7 +12,9 @@
   "license": "ISC",
   "dependencies": {
     "aws-sdk": "^2.601.0",
+    "dynamodb-store": "^1.2.0",
     "express": "^4.17.1",
+    "express-session": "^1.17.0",
     "pug": "^2.0.4"
   },
   "devDependencies": {
