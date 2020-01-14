@@ -2,6 +2,7 @@
 
 var express = require('express');
 var router = express.Router();
+var database = require("../data/database.js");
 
 // Sign up button from index page.
 router.get('', (req, res) => {
@@ -9,8 +10,29 @@ router.get('', (req, res) => {
 });
 
 // Sign up button from signup page.
-router.post('', (req, res) => {
-    res.render("index", { title: "Home" });
+router.post('', async function (req, res) {
+    console.log("Inside post request");
+    
+    let user = {
+        username: req.body.username,
+        email: req.body.email,
+        firstname: req.body.firstname,
+        lastname: req.body.lastname,
+        password: req.body.password
+    };
+
+    console.log("Form Data:")
+    console.log("Username: " + user.username + " | Email: " + user.email + " | Firstname: " + user.firstname + " | Lastname: " + user.lastname + " | Password: " + user.password);
+
+    let status = await database.signUp(user);
+
+    if (status === "SUCCESS") {
+        res.render("index", { title: "Home", message: "Signup successful. Please login." });
+    } else if (status === "ALREADY_EXISTS") {
+        res.render("signup", { title: "Home", message: "Username already exists." });
+    } else {
+        res.render("index", { title: "Home", message: "Signup failed. Please contact developers." });
+    }
 });
 
 module.exports = router;
