@@ -10,7 +10,7 @@ var access = require("../data/access.json");
 let awsConfig = {
     "region": "us-east-2",
     "endpoint": "http://dynamodb.us-east-2.amazonaws.com",
-    "accessKeyId": access.accessKeyId, 
+    "accessKeyId": access.accessKeyId,
     "secretAccessKey": access.secretAccessKey
 };
 
@@ -119,10 +119,10 @@ function signUp(user) {
                 console.log("Inside signUp docClient.put callback.");
                 if (err) {
                     console.log("signUp::users::docClient.put::ERROR - " + JSON.stringify(err, null, 2));
-                    reject(err);                
+                    reject(err);
                 } else {
                     console.log("signUp::users::docClient.put::SUCCESS");
-                    resolve("SUCCESS");                 
+                    resolve("SUCCESS");
                 }
             });
         }
@@ -161,6 +161,37 @@ function getIncompleteDeeds(username) {
     });
 }
 
+
+function completeDeed(username) {
+    return new Promise((resolve, reject) => {
+        console.log("Inside completeDeed");
+        var params = {
+            TableName: "deeds",
+            FilterExpression: "username = :username",
+            ExpressionAttributeValues: {
+                ":username": username,
+            }
+        };
+
+        docClient.scan(params, function (err, data) {
+            console.log("Inside completeDeed docClient.scan callback.");
+            if (err) {
+                console.log("completeDeed::deeds::docClient.scan::ERROR - " + err);
+                reject();
+            } else {
+                console.log("completeDeed::rawData - " + JSON.stringify(data));
+                let results = JSON.parse(JSON.stringify(data));
+                if (results.Count === 0) {
+                    console.log("completeDeed::deeds::docClient.scan::success::NO_INCOMPLETE_DEEDS");
+                    resolve(false);
+                } else {
+                    console.log("completeDeed::deeds::docClient.scan::success::INCOMPLETE_DEEDS_EXIST");
+                    resolve(results.Items);
+                }
+            }
+        });
+    });
+}
 module.exports = {
     checkUsername: checkUsername,
     checkPassword: checkPassword,
