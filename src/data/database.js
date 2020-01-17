@@ -161,7 +161,8 @@ function getIncompleteDeeds(username) {
     });
 }
 
-
+//This whole function should execute when the "completeDeed" button is 
+//pressed on user.pug.
 function completeDeed(username) {
     return new Promise((resolve, reject) => {
         console.log("Inside completeDeed");
@@ -179,23 +180,38 @@ function completeDeed(username) {
                 console.log("completeDeed::deeds::docClient.scan::ERROR - " + err);
                 reject();
             } else {
+
+                //I'm not sure if this is right.
+                //I am trying to change the complete columnn in the database to true after they click the 
+                //complete button.
+
                 console.log("completeDeed::rawData - " + JSON.stringify(data));
                 let results = JSON.parse(JSON.stringify(data));
-                if (results.Count === 0) {
-                    console.log("completeDeed::deeds::docClient.scan::success::NO_INCOMPLETE_DEEDS");
-                    resolve(false);
-                } else {
-                    console.log("completeDeed::deeds::docClient.scan::success::INCOMPLETE_DEEDS_EXIST");
-                    resolve(results.Items);
-                }
+                results.completed = true;
             }
         });
     });
 }
+function addDeed(username) {
+
+}
+
+
+
+
+
+function skipDeed(username);
+
+function getDataForHeatmap(username);
+
 module.exports = {
     checkUsername: checkUsername,
     checkPassword: checkPassword,
     getUser: getUser,
     signUp: signUp,
-    getIncompleteDeeds: getIncompleteDeeds
+    getIncompleteDeeds: getIncompleteDeeds,
+    completeDeed: completeDeed,
+    addDeed: addDeed,
+    skipDeed: skipDeed,
+    getDataForHeatmap: getDataForHeatmap
 };

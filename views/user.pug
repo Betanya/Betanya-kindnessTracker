@@ -4,9 +4,9 @@ block layout-content
     include nav
     h1 Welcome, #{user.firstname}!
     p.mt-2 #{randomDeed}
-    button(type="button" class="btn btn-light mt-2")
+    button(type="button" class="btn btn-light mt-2" onclick="completeDeed")
         a(href="/complete") Deed complete!
-    button(type="button" class="btn btn-light mt-2")
+    button(type="button" class="btn btn-light mt-2" onclick="addDeed")
         a(href="/addDeed") Add New Deed
-    button(type="button" class="btn btn-light mt-2")
+    button(type="button" class="btn btn-light mt-2" onclick="skipDeed")
         a(href="/skip") Skip
