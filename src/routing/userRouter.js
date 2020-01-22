@@ -3,12 +3,21 @@
 var express = require('express');
 var router = express.Router();
 var database = require("../data/database.js");
+var deedsUtil = require("../util/deeds.js");
 
-router.get('', function (req, res) {
+router.get('', async function (req, res) {
     console.log("Inside user router.get");
     let user = req.session.user;
-    console.log("User from session in router.get: " + JSON.stringify(user));
-    res.render("user", { title: "User", user: user, message: "" });
+
+    if (user === undefined) {
+        res.render("index", { title: "Index", message: "Please login."});
+    } else {
+        let deeds = await database.getIncompleteDeeds(user.username);
+        let randomDeed = deedsUtil.generateRandomDeed(deeds);
+
+        console.log("User from session in router.get: " + JSON.stringify(user));
+        res.render("user", { title: "User", user: user, message: "", randomDeed: randomDeed });
+    }
 });
 
 router.post('', async function (req, res) {
@@ -30,15 +39,12 @@ router.post('', async function (req, res) {
 
                 let deeds = await database.getIncompleteDeeds(user.username);
                 let randomDeed = "";
+                console.log("DEEDS: \n" + JSON.stringify(deeds));
 
                 if (deeds === false) {
                     randomDeed = "You have completed all your deeds!"
                 } else {
-                    let randomNumber = Math.floor(Math.random() * Math.floor(deeds.length));
-                    console.log("Random number: " + randomNumber);
-                    console.log("Deeds[i]: " + deeds[randomNumber]);
-                    randomDeed = deeds[randomNumber].deedDescription;
-                    console.log("Random deed: " + randomDeed);
+                    randomDeed = deedsUtil.generateRandomDeed(deeds);
                 }
 
                 res.render("user", { title: "User", user: user, randomDeed: randomDeed });
@@ -49,7 +55,7 @@ router.post('', async function (req, res) {
             res.render("index", { title: "Index", message: "Username is invalid."});
         }
     } catch (ex) {
-        console.log("userRouter.post::try-catch::ERROR_THROWN");
+        console.log("userRouter.post::try-catch::ERROR_THROWN - \n" + ex.message);
         res.render("index", { title: "Index", message: "ERROR. CONTACT DEVELOPER."});
     }
 });
