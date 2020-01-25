@@ -5,7 +5,9 @@ var router = express.Router();
 
 // Logout button on nav after user has logged in
 router.get('', (req, res) => {
-    res.render("index", { title: "Home" });
+    req.session.destroy(function(err) {
+        res.render("index", { title: "Index" });
+    });
 });
 
 module.exports = router;
