@@ -3,10 +3,25 @@ extends layout
 block layout-content
     include nav
     h1 Welcome, #{user.firstname}!
-    p.mt-2 #{randomDeed}
+    p.mt-2 #{deed}
     button(type="button" class="btn btn-light mt-2")
         a(href="/complete") Deed complete!
     button(type="button" class="btn btn-light mt-2")
         a(href="/addDeed") Add New Deed
-    button(type="button" class="btn btn-light mt-2")
-        a(href="/skip") Skip
+    if moreThanOneDeed == true
+        button(type="button" class="btn btn-light mt-2")
+            a(href="/skip") Skip
+    else
+        button(type="button" class="btn btn-light mt-2" disabled)
+            a() Skip
+    if status == true
+        script.
+            alert("Deed added!")
+    else if status == false
+        script.
+            alert("Unable to add deed!")
+    else if status == "This deed already exists."
+        script.
+            alert(status)
+    else
+        console.log("Test")

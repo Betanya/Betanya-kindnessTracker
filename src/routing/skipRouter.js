@@ -2,17 +2,35 @@
 
 var express = require('express');
 var router = express.Router();
-var database = require("../data/database.js");
-var deedsUtil = require("../util/deeds.js");
 
 // Skip button on user page
 router.get('', async function (req, res) {
+    let user = req.session.user;
+    let deed = "";
 
-    // TO DO: Need to figure out a way to keep track of current deed being displayed.
-    // let user = req.session.user;
-    // let deeds = await database.getIncompleteDeeds(user.username);
-    // let randomDeed = deedsUtil.generateRandomDeed(deeds);
-    // res.render("user", { title: "User", user: user, message: "", randomDeed: randomDeed });
+    if (user === undefined) {
+        res.render("index", { title: "Index", message: "Please login."});
+    } else {
+        let deeds = req.session.deeds;
+        let currentDeedIndex = req.session.currentDeedIndex;
+        if (currentDeedIndex == (deeds.length - 1)) {
+            currentDeedIndex = 0;
+            req.session.currentDeedIndex = currentDeedIndex;
+            deed = deeds[currentDeedIndex].deedDescription;
+        } else {
+            deed = deeds[currentDeedIndex + 1].deedDescription;
+            req.session.currentDeedIndex = currentDeedIndex + 1;
+        }
+        
+        res.render("user", 
+        { 
+            title: "User", 
+            user: user, 
+            message: "",
+            deed: deed,
+            moreThanOneDeed: req.session.moreThanOneDeed
+        });
+    }
 });
 
 module.exports = router;
