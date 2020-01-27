@@ -7,35 +7,47 @@ var database = require("../data/database.js");
 router.get('', async function (req, res) {
     console.log("Inside user router.get");
     let user = req.session.user;
-    let deed = "";
 
     if (user === undefined) {
-        res.render("index", { title: "Index", message: "Please login."});
+        res.render("index", { title: "Index"});
     } else {
-        let deeds = req.session.deeds;
+        let deeds;
+        let status = "";
+        let moreThanOneDeed;
+        let deedsExist;
+        let deed;
 
-        if (deeds === undefined) {
-            deed = "You have completed all your deeds!";
-            res.render("user", 
-            { 
-                title: "User", 
-                user: user, 
-                message: "", 
-                deed: deed,
-                moreThanOneDeed: req.session.moreThanOneDeed
-            });
-        } else {
-            deed = deeds[0].deedDescription;
-            req.session.currentDeedIndex = 0;
-            res.render("user", 
-            { 
-                title: "User", 
-                user: user, 
-                message: "", 
-                deed: deed,
-                moreThanOneDeed: req.session.moreThanOneDeed
-            });
-        }   
+        try {
+            deeds = await database.getIncompleteDeeds(user.username);
+            
+            if (deeds === false) {
+                deed = "You have completed all your deeds!"
+                deedsExist = false;
+                moreThanOneDeed = false;
+            } else {
+                deedsExist = true;
+                deed = deeds[0].deedDescription;
+                req.session.currentDeedIndex = 0;
+                req.session.deeds = deeds;
+
+                console.log(deeds.length);
+                moreThanOneDeed = deeds.length > 1 ? true : false;
+                console.log(moreThanOneDeed);
+                req.session.moreThanOneDeed = moreThanOneDeed;
+            }
+        } catch (ex) {
+            status = "Error";
+        }
+
+        res.render("user", 
+        { 
+            title: "User", 
+            user: user,
+            deed: deed,
+            moreThanOneDeed: moreThanOneDeed,
+            deedsExist: deedsExist,
+            status: status
+        });
     }
 });
 
@@ -60,9 +72,11 @@ router.post('', async function (req, res) {
                 console.log("DEEDS: \n" + JSON.stringify(deeds));
                 
                 let moreThanOneDeed;
+                let deedsExist;
 
                 if (deeds === false) {
                     deed = "You have completed all your deeds!"
+                    deedsExist = false;
                 } else {
                     deed = deeds[0].deedDescription;
                     req.session.currentDeedIndex = 0;
@@ -74,7 +88,7 @@ router.post('', async function (req, res) {
                     req.session.moreThanOneDeed = moreThanOneDeed;
                 }
 
-                res.render("user", { title: "User", user: user, deed: deed, moreThanOneDeed: moreThanOneDeed });
+                res.render("user", { title: "User", user: user, deed: deed, moreThanOneDeed: moreThanOneDeed, deedsExist: deedsExist });
             } else {
                 res.render("index", { title: "Index", message: "Password is invalid."});
             }

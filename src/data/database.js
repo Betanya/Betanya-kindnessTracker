@@ -189,11 +189,39 @@ function addDeed(username, deedDescription) {
     });
 }
 
+function markDeedCompleted(deedId) {
+    return new Promise((resolve, reject) => {
+        var params = {
+            TableName: "deeds",
+            Key: { 
+                "id": deedId 
+            },
+            UpdateExpression: "set completed = :completed",
+            ExpressionAttributeValues: {
+                ":completed": true
+            },
+            ReturnValues: "UPDATED_NEW"
+    
+        };
+        docClient.update(params, function (err, data) {
+            console.log("Inside markDeedCompleted docClient.put callback.");
+            if (err) {
+                console.log("markDeedCompleted::deeds::docClient.update::ERROR - " + err);
+                reject();
+            } else {
+                console.log("markDeedCompleted::deeds::docClient.update::success::DEED_UPDATED");
+                resolve();
+            }
+        });
+    });
+}
+
 module.exports = {
     checkUsername: checkUsername,
     checkPassword: checkPassword,
     getUser: getUser,
     signUp: signUp,
     getIncompleteDeeds: getIncompleteDeeds,
-    addDeed: addDeed
+    addDeed: addDeed,
+    markDeedCompleted: markDeedCompleted
 };

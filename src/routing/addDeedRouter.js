@@ -21,26 +21,32 @@ router.post('', async function(req, res) {
     console.log("Inside addDeedRouter.post.");
     let user = req.session.user;
     let deedDescription = req.body.deedDescription;
-    let status;
+    let status = "";
     let moreThanOneDeed;
     let deed;
+    let deedsExist = true;
 
-    let currentDeeds = req.session.deeds;
+    let currentDeeds = await database.getIncompleteDeeds(user.username);
     console.log("Current Deeds: " + JSON.stringify(currentDeeds));
-    for (d of currentDeeds) {
-        console.log("Loop deed: " + d.deedDescription.toLowerCase() + " | Deed Description: " + deedDescription.toLowerCase());
-        if (d.deedDescription.toLowerCase() === deedDescription.toLowerCase()) {
-            status = "This deed already exists.";
-            break;
+
+    if (currentDeeds != false) {
+        for (d of currentDeeds) {
+            console.log("Loop deed: " + d.deedDescription.toLowerCase() + " | Deed Description: " + deedDescription.toLowerCase());
+            if (d.deedDescription.toLowerCase() === deedDescription.toLowerCase()) {
+                status = "Exists";
+                break;
+            }
         }
+    } else {
+        deedsExist = false;
     }
 
     console.log("Status: " + status);
 
     try {
-        if (status === undefined) {
+        if (status === "") {
             await database.addDeed(user.username, deedDescription);
-            status = true;
+            status = "Nonexistent";
         }
 
         let deeds = await database.getIncompleteDeeds(user.username);
@@ -56,7 +62,7 @@ router.post('', async function(req, res) {
         req.session.moreThanOneDeed = moreThanOneDeed;
         
     } catch (ex) {
-        status = false;
+        status = "Error";
     }
     
     res.render("user", 
@@ -66,7 +72,8 @@ router.post('', async function(req, res) {
         message: "",
         deed: deed,
         moreThanOneDeed: moreThanOneDeed,
-        status: status
+        status: status,
+        deedsExist: deedsExist
     });
 });
 

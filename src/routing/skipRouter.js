@@ -28,7 +28,8 @@ router.get('', async function (req, res) {
             user: user, 
             message: "",
             deed: deed,
-            moreThanOneDeed: req.session.moreThanOneDeed
+            moreThanOneDeed: req.session.moreThanOneDeed,
+            deedsExist: deeds.length > 0 ? true: false
         });
     }
 });
