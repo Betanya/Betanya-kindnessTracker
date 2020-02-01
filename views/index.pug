@@ -3,16 +3,16 @@ extends layout
 block layout-content
     h1 Kindness Tracker
     form(method="POST" action="user")
-        label(for="username") Username:
-        input#username(type="text" name="username" required placeholder="Enter username...")
-        br
-        label(for="password") Password:
-        input#password(type="password" name="password" required placeholder="Enter password...")
-        br
-        input(type="submit" value="Login")
+        div(class="form-group row")
+            label(for="username" class="col-sm-1 col-form-label") Username:
+            div(class="col-sm-3")
+                input#username(type="text" name="username" required placeholder="Enter username..." class="form-control")
+        div(class="form-group row")
+            label(for="password" class="col-sm-1 col-form-label") Password:
+            div(class="col-sm-3")
+                input#password(type="password" name="password" required placeholder="Enter password..." class="form-control")
+        input(type="submit" value="Login" class="btn btn-primary")
     div
-        p If you do not have an account, please go to the sign up page below:
+        p(class="mt-3") If you do not have an account, please go to the sign up page below:
         form(method="GET" action="signup")
-            input(type="submit" value="Sign Up")
-    div
-        p #{message}
+            input(type="submit" value="Sign Up" class="btn btn-primary mb-2")

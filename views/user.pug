@@ -3,10 +3,25 @@ extends layout
 block layout-content
     include nav
     h1 Welcome, #{user.firstname}!
-    p.mt-2 #{randomDeed}
-    button(type="button" class="btn btn-light mt-2")
-        a(href="/complete") Deed complete!
-    button(type="button" class="btn btn-light mt-2")
-        a(href="/addDeed") Add New Deed
-    button(type="button" class="btn btn-light mt-2")
-        a(href="/skip") Skip
+    p.mt-2 #{deed}
+    a(href="/addDeed" class="btn btn-outline-primary" role="button") Add New Deed
+
+    if deedsExist == true
+        a(href="/complete" class="btn btn-outline-primary ml-2" role="button") Deed complete!
+    else
+        a(class="btn btn-outline-secondary ml-2 disabled" role="button") Deed complete!
+
+    if moreThanOneDeed == true
+        a(href="/skip" class="btn btn-outline-primary ml-2" role="button") Skip
+    else
+        a(class="btn btn-outline-secondary ml-2 disabled" role="button") Skip
+
+    if status == "Nonexistent"
+        script.
+            alert("Deed added!")
+    else if status == "Error"
+        script.
+            alert("Unable to add deed!")
+    else if status == "Exists"
+        script.
+            alert("Deed already exists!")

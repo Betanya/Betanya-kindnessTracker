@@ -161,10 +161,67 @@ function getIncompleteDeeds(username) {
     });
 }
 
+function addDeed(username, deedDescription) {
+    return new Promise((resolve, reject) => {
+        var input = {
+            "id": (Math.floor(Math.random() * Math.floor(300000000))).toString(),
+            "completed": false, 
+            "dateAdded": new Date().toISOString(),
+            "deedDescription": deedDescription, 
+            "username": username
+        };
+
+        var params = {
+            TableName: "deeds",
+            Item: input
+        };
+
+        docClient.put(params, function (err, data) {
+            console.log("Inside addDeed docClient.put callback.");
+            if (err) {
+                console.log("addDeed::deeds::docClient.put::ERROR - " + err);
+                reject();
+            } else {
+                console.log("addDeed::deeds::docClient.put::success::DEED_ADDED");
+                resolve();
+            }
+        });
+    });
+}
+
+function markDeedCompleted(deedId) {
+    return new Promise((resolve, reject) => {
+        var params = {
+            TableName: "deeds",
+            Key: { 
+                "id": deedId 
+            },
+            UpdateExpression: "set completed = :completed",
+            ExpressionAttributeValues: {
+                ":completed": true
+            },
+            ReturnValues: "UPDATED_NEW"
+    
+        };
+        docClient.update(params, function (err, data) {
+            console.log("Inside markDeedCompleted docClient.put callback.");
+            if (err) {
+                console.log("markDeedCompleted::deeds::docClient.update::ERROR - " + err);
+                reject();
+            } else {
+                console.log("markDeedCompleted::deeds::docClient.update::success::DEED_UPDATED");
+                resolve();
+            }
+        });
+    });
+}
+
 module.exports = {
     checkUsername: checkUsername,
     checkPassword: checkPassword,
     getUser: getUser,
     signUp: signUp,
-    getIncompleteDeeds: getIncompleteDeeds
+    getIncompleteDeeds: getIncompleteDeeds,
+    addDeed: addDeed,
+    markDeedCompleted: markDeedCompleted
 };

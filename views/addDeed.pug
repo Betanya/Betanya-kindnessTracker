@@ -4,6 +4,6 @@ block layout-content
     include nav
     h1 Add New Deed
     form(method="POST" action="addDeed")
-        input(type="text" id="kindDeed" placeholder="Kind Deed")
+        input(type="text" id="kindDeed" name="deedDescription" placeholder="Kind Deed" required)
         br
-        input(type="submit" value="Add" class="btn btn-light mt-2")
+        input(type="submit" value="Add" class="btn btn-primary mt-2")

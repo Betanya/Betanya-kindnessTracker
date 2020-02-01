@@ -3,20 +3,51 @@
 var express = require('express');
 var router = express.Router();
 var database = require("../data/database.js");
-var deedsUtil = require("../util/deeds.js");
 
 router.get('', async function (req, res) {
     console.log("Inside user router.get");
     let user = req.session.user;
 
     if (user === undefined) {
-        res.render("index", { title: "Index", message: "Please login."});
+        res.render("index", { title: "Index"});
     } else {
-        let deeds = await database.getIncompleteDeeds(user.username);
-        let randomDeed = deedsUtil.generateRandomDeed(deeds);
+        let deeds;
+        let status = "";
+        let moreThanOneDeed;
+        let deedsExist;
+        let deed;
 
-        console.log("User from session in router.get: " + JSON.stringify(user));
-        res.render("user", { title: "User", user: user, message: "", randomDeed: randomDeed });
+        try {
+            deeds = await database.getIncompleteDeeds(user.username);
+            
+            if (deeds === false) {
+                deed = "You have completed all your deeds!"
+                deedsExist = false;
+                moreThanOneDeed = false;
+            } else {
+                deedsExist = true;
+                deed = deeds[0].deedDescription;
+                req.session.currentDeedIndex = 0;
+                req.session.deeds = deeds;
+
+                console.log(deeds.length);
+                moreThanOneDeed = deeds.length > 1 ? true : false;
+                console.log(moreThanOneDeed);
+                req.session.moreThanOneDeed = moreThanOneDeed;
+            }
+        } catch (ex) {
+            status = "Error";
+        }
+
+        res.render("user", 
+        { 
+            title: "User", 
+            user: user,
+            deed: deed,
+            moreThanOneDeed: moreThanOneDeed,
+            deedsExist: deedsExist,
+            status: status
+        });
     }
 });
 
@@ -38,16 +69,26 @@ router.post('', async function (req, res) {
                 console.log("userRouter.post::try-catch::VALID_USER: \n" + JSON.stringify(user));
 
                 let deeds = await database.getIncompleteDeeds(user.username);
-                let randomDeed = "";
                 console.log("DEEDS: \n" + JSON.stringify(deeds));
+                
+                let moreThanOneDeed;
+                let deedsExist;
 
                 if (deeds === false) {
-                    randomDeed = "You have completed all your deeds!"
+                    deed = "You have completed all your deeds!"
+                    deedsExist = false;
                 } else {
-                    randomDeed = deedsUtil.generateRandomDeed(deeds);
+                    deed = deeds[0].deedDescription;
+                    req.session.currentDeedIndex = 0;
+                    req.session.deeds = deeds;
+
+                    console.log(deeds.length);
+                    moreThanOneDeed = deeds.length > 1 ? true : false;
+                    console.log(moreThanOneDeed);
+                    req.session.moreThanOneDeed = moreThanOneDeed;
                 }
 
-                res.render("user", { title: "User", user: user, randomDeed: randomDeed });
+                res.render("user", { title: "User", user: user, deed: deed, moreThanOneDeed: moreThanOneDeed, deedsExist: deedsExist });
             } else {
                 res.render("index", { title: "Index", message: "Password is invalid."});
             }
