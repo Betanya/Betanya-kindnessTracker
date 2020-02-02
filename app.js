@@ -5,21 +5,19 @@
  * Required External Modules
  */
 
-const express = require("express");
-const path = require("path");
-const session = require('express-session');
-const DynamoDBStore = require('dynamodb-store');
-const access = require("./src/data/access.json");
+const express = require("express");                             // Use express npm module.
+const path = require("path");                                   // Use path npm module.
+const session = require('express-session');                     // Use express-session npm module.
+const DynamoDBStore = require('dynamodb-store');                // Use dynamodb-store npm module.
+const access = require("./src/data/access.json");               // Use our access.json to get database login information
 
 
 /**
  * App Variables
  */
 
-const app = express();
-const port = process.env.PORT || "8000";
-
-//console.log("Session options: " + JSON.stringify(sessionOptions, null, 2));
+const app = express();                                          // Create express app.
+const port = process.env.PORT || "8000";                        // Specify port number app should use.
 
 
 /**
@@ -30,8 +28,8 @@ app.use(
     // Creates a session middleware with given options.
     session({
 
-        // Defaults to MemoryStore, meaning sessions are stored as POJOs
-        // in server memory, and are wiped out when the server restarts.
+        // Session information stored in DynamoDB table called sessions.
+        // Uses the 'dynamodb-store' npm module.
         store: new DynamoDBStore({
             table: {
               name: 'sessions',
@@ -62,16 +60,9 @@ app.use(
         // need to write to the store if the session didn't change.
         resave: false,
 
-        // Whether to force-set a session ID cookie on every response. Default is
-        // false. Enable this if you want to extend session lifetime while the user
-        // is still browsing the site. Beware that the module doesn't have an absolute
-        // timeout option (see https://github.com/expressjs/session/issues/557), so
-        // you'd need to handle indefinite sessions manually.
-        // rolling: false,
-
         // Secret key to sign the session ID. The signature is used
         // to validate the cookie against any tampering client-side.
-        secret: `quiet, pal! it's a secret!`,
+        secret: "a_random1234567890!$$$@#%^&secr3tc0d3!!!!",
 
         // Settings object for the session ID cookie. The cookie holds a
         // session ID ref in the form of 's:{SESSION_ID}.{SIGNATURE}' for example:
@@ -86,20 +77,11 @@ app.use(
         cookie: {
 
             // Path attribute in Set-Cookie header. Defaults to the root path '/'.
-            // path: '/',
-
-            // Domain attribute in Set-Cookie header. There's no default, and
-            // most browsers will only apply the cookie to the current domain.
-            // domain: null,
+            path: '/',
 
             // HttpOnly flag in Set-Cookie header. Specifies whether the cookie can
             // only be read server-side, and not by JavaScript. Defaults to true.
-            // httpOnly: true,
-
-            // Expires attribute in Set-Cookie header. Set with a Date object, though
-            // usually maxAge is used instead. There's no default, and the browsers will
-            // treat it as a session cookie (and delete it when the window is closed).
-            // expires: new Date(...)
+            httpOnly: true,
 
             // Preferred way to set Expires attribute. Time in milliseconds until
             // the expiry. There's no default, so the cookie is non-persistent.
@@ -117,54 +99,55 @@ app.use(
         }
     })
 )
-app.set("views", path.join(__dirname, "views"));
-app.set("view engine", "pug");
-app.use(express.static(path.join(__dirname, "public")));
-app.use(express.urlencoded());
-app.use(express.json());
+app.set("views", path.join(__dirname, "views"));                    // Specifies path to views folder.
+app.set("view engine", "pug");                                      // Tells express that pug is the view engine.
+app.use(express.static(path.join(__dirname, "public")));            // Makes public folder available in html (pug) pages for scripts.
+app.use(express.urlencoded());                                      // Look at express documentation
+app.use(express.json());                                            // Look at express documentation
 
 
 /**
  * Routes Definitions
  */
 
-// Index router.
-var indexRouter = require('./src/routing/indexRouter.js');
-app.use('/', indexRouter);
-
-// User router.
-var userRouter = require('./src/routing/userRouter.js');
-app.use('/user', userRouter);
-
-// Sign Up router.
-var signupRouter = require('./src/routing/signupRouter.js');
-app.use('/signup', signupRouter);
-
-// History router.
-var historyRouter = require('./src/routing/historyRouter.js');
-app.use('/history', historyRouter);
-
-// Complete router.
-var completeRouter = require('./src/routing/completeRouter.js');
-app.use('/complete', completeRouter);
-
 // Add Deed router.
-var addDeedRouter = require('./src/routing/addDeedRouter.js');
+var addDeedRouter = require('./src/routing/addDeedRouter.js');                  // Specifies add deed page router.
 app.use('/addDeed', addDeedRouter);
 
-// Skip router.
-var skipRouter = require('./src/routing/skipRouter.js');
-app.use('/skip', skipRouter);
+// Complete router.
+var completeRouter = require('./src/routing/completeRouter.js');                // Specifies complete page router.
+app.use('/complete', completeRouter);
+
+// History router.
+var historyRouter = require('./src/routing/historyRouter.js');                  // Specifies history page router.
+app.use('/history', historyRouter);
+
+// Index router.
+var indexRouter = require('./src/routing/indexRouter.js');                      // Specifies index page router.
+app.use('/', indexRouter);
 
 // Logout router.
-var logoutRouter = require('./src/routing/logoutRouter.js');
+var logoutRouter = require('./src/routing/logoutRouter.js');                    // Specifies logout page router.
 app.use('/logout', logoutRouter);
+
+// Sign Up router.
+var signupRouter = require('./src/routing/signupRouter.js');                    // Specifies signup page router.
+app.use('/signup', signupRouter);
+
+// Skip router.
+var skipRouter = require('./src/routing/skipRouter.js');                        // Specifies skip page router.
+app.use('/skip', skipRouter);
+
+// User router.
+var userRouter = require('./src/routing/userRouter.js');                        // Specifies user page router.
+app.use('/user', userRouter);
+
 
 
 /**
  * Server Activation
  */
 
-app.listen(port, () => {
+app.listen(port, () => {                                                        // Start express app. Begin listening for requests on X port.
     console.log(`Listening to requests on http://localhost:${port}`);
 });

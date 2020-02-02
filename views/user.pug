@@ -1,27 +1,37 @@
+//- Uses the layout.pug file.
 extends layout
 
+//- Tells the layout.pug file where to put the below markup.
 block layout-content
     include nav
     h1 Welcome, #{user.firstname}!
-    p.mt-2 #{deed}
-    a(href="/addDeed" class="btn btn-outline-primary" role="button") Add New Deed
 
-    if deedsExist == true
-        a(href="/complete" class="btn btn-outline-primary ml-2" role="button") Deed complete!
+    //- Checks if user has deeds and determines which deed or message to show based on current deed index (if any).
+    if deeds.length > 0
+        if deedIndex === undefined
+            p.mt-2 #{deeds[0].deedDescription}
+        else
+            p.mt-2 #{deeds[deedIndex].deedDescription}
+        a(href="/complete" class="btn btn-outline-primary" role="button") Deed completed
     else
-        a(class="btn btn-outline-secondary ml-2 disabled" role="button") Deed complete!
+        p.mt-2 You have completed all your deeds!
 
-    if moreThanOneDeed == true
+        //- Disables "Deed completed" button if user does not have any deeds.
+        a(class="btn btn-outline-secondary disabled" role="button") Deed completed
+
+    //- Checks if user has more than one deed to determine if the skip button should be available.
+    if deeds.length > 1
         a(href="/skip" class="btn btn-outline-primary ml-2" role="button") Skip
     else
+        //- Disables "Skip" button when user has less than or equal to 1 deed.
         a(class="btn btn-outline-secondary ml-2 disabled" role="button") Skip
 
-    if status == "Nonexistent"
-        script.
-            alert("Deed added!")
-    else if status == "Error"
-        script.
-            alert("Unable to add deed!")
-    else if status == "Exists"
+    a(href="/addDeed" class="btn btn-outline-primary ml-2" role="button") Add New Deed
+
+    //- Alert from server after user adds a new deed.
+    if deedAlreadyExists === true
         script.
             alert("Deed already exists!")
+    else if deedAlreadyExists === false
+        script.
+            alert("Deed added!")

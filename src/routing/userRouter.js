@@ -1,104 +1,70 @@
 // userRouter.js - User route module.
 
+// Dependencies
 var express = require('express');
 var router = express.Router();
 var database = require("../data/database.js");
 
+// Home button on nav (or requests to domain/user).
 router.get('', async function (req, res) {
-    console.log("Inside user router.get");
     let user = req.session.user;
 
     if (user === undefined) {
-        res.render("index", { title: "Index"});
+        res.render("index", { title: "Index", message: "Please login." } );             // Redirects to index page for login.
     } else {
-        let deeds;
-        let status = "";
-        let moreThanOneDeed;
-        let deedsExist;
-        let deed;
-
-        try {
-            deeds = await database.getIncompleteDeeds(user.username);
-            
-            if (deeds === false) {
-                deed = "You have completed all your deeds!"
-                deedsExist = false;
-                moreThanOneDeed = false;
-            } else {
-                deedsExist = true;
-                deed = deeds[0].deedDescription;
-                req.session.currentDeedIndex = 0;
-                req.session.deeds = deeds;
-
-                console.log(deeds.length);
-                moreThanOneDeed = deeds.length > 1 ? true : false;
-                console.log(moreThanOneDeed);
-                req.session.moreThanOneDeed = moreThanOneDeed;
-            }
-        } catch (ex) {
-            status = "Error";
-        }
-
-        res.render("user", 
-        { 
-            title: "User", 
+        let options = {                                                                 // Options to be passed to UI
+            title: "User",
             user: user,
-            deed: deed,
-            moreThanOneDeed: moreThanOneDeed,
-            deedsExist: deedsExist,
-            status: status
-        });
+            deeds: []
+        }
+        
+        options.deeds = await database.getIncompleteDeeds(user.username);               // Update deeds property with incomplete deeds.
+        
+        req.session.currentDeedIndex = 0;                                               // Allows for skip functionality to work.
+        req.session.deeds = options.deeds;                                              // Adds deeds to session.
+
+        res.render("user", options);                                                    // Sends to user page.
     }
 });
 
+// Login button on index page.
 router.post('', async function (req, res) {
-    console.log("Inside userRouter post request");
     let username = req.body.username;
     let password = req.body.password;
-    console.log("Username: " + username + " | Password: " + password);
 
     try {
-        let usernameExists = await database.checkUsername(username);
+        let usernameExists = await database.checkUsername(username);                    // Checks if username exists in database.
 
         if (usernameExists) {
-            let validPassword = await database.checkPassword(username, password);
+            let validPassword = await database.checkPassword(username, password);       // Checks if password entered is valid.
 
             if (validPassword) {
-                let user = await database.getUser(username);
+                let user = await database.getUser(username);                            // Gets the user from the database.
                 req.session.user = user;
-                console.log("userRouter.post::try-catch::VALID_USER: \n" + JSON.stringify(user));
 
-                let deeds = await database.getIncompleteDeeds(user.username);
-                console.log("DEEDS: \n" + JSON.stringify(deeds));
-                
-                let moreThanOneDeed;
-                let deedsExist;
-
-                if (deeds === false) {
-                    deed = "You have completed all your deeds!"
-                    deedsExist = false;
-                } else {
-                    deed = deeds[0].deedDescription;
-                    req.session.currentDeedIndex = 0;
-                    req.session.deeds = deeds;
-
-                    console.log(deeds.length);
-                    moreThanOneDeed = deeds.length > 1 ? true : false;
-                    console.log(moreThanOneDeed);
-                    req.session.moreThanOneDeed = moreThanOneDeed;
+                let options = {                                                         // Options to be passed to UI.
+                    title: "User",
+                    user: user,
+                    deeds: []
                 }
-
-                res.render("user", { title: "User", user: user, deed: deed, moreThanOneDeed: moreThanOneDeed, deedsExist: deedsExist });
+                
+                options.deeds = await database.getIncompleteDeeds(user.username);       // Update deeds property with all incomplete deeds.
+        
+                req.session.currentDeedIndex = 0;                                       // Allows for skip functionality to work.
+                req.session.deeds = options.deeds;                                      // Adds deeds to session.
+        
+                res.render("user", options);                                            // Sends to user page.
             } else {
-                res.render("index", { title: "Index", message: "Password is invalid."});
+                res.render("index", { title: "Index", message: "Password is invalid." });       // Redirects user back to index page.
             }
         } else {
-            res.render("index", { title: "Index", message: "Username is invalid."});
+            res.render("index", { title: "Index", message: "Username is invalid." });           // Redirects user back to index page.
         }
     } catch (ex) {
-        console.log("userRouter.post::try-catch::ERROR_THROWN - \n" + ex.message);
-        res.render("index", { title: "Index", message: "ERROR. CONTACT DEVELOPER."});
+
+        // On error from any of the above database requests, redirects user to index page.
+        res.render("index", { title: "Index", message: "Error. Please contact developers."});
     }
 });
 
-module.exports = router;
+module.exports = router;                                                                // Allows router object to be used by app.js.

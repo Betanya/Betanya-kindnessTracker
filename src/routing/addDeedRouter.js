@@ -1,80 +1,48 @@
 // addDeedRouter.js - Add deed route module.
 
+// Dependencies
 var express = require('express');
 var router = express.Router();
 var database = require("../data/database.js");
+var deedsUtil = require("../util/deedsUtil.js")
 
-// Add New Deed button on user page
+// Add New Deed button on user page (or a request to domain/addDeed).
+// Checks if user is logged in.
 router.get('', (req, res) => {
-    console.log("Inside addDeed router.get");
     let user = req.session.user;
 
     if (user === undefined) {
-        res.render("index", { title: "Index", message: "Please login."});
+        res.render("index", { title: "Index", message: "Please login." });          // Redirects to index page for login.
     } else {
-        res.render("addDeed", { title: "Add" });
+        res.render("addDeed", { title: "Add" });                                    // Sends to addDeed page.
     }
 });
 
-// Add button on addDeed page
+// Add button on addDeed page.
 router.post('', async function(req, res) {
-    console.log("Inside addDeedRouter.post.");
-    let user = req.session.user;
-    let deedDescription = req.body.deedDescription;
-    let status = "";
-    let moreThanOneDeed;
-    let deed;
-    let deedsExist = true;
-
-    let currentDeeds = await database.getIncompleteDeeds(user.username);
-    console.log("Current Deeds: " + JSON.stringify(currentDeeds));
-
-    if (currentDeeds != false) {
-        for (d of currentDeeds) {
-            console.log("Loop deed: " + d.deedDescription.toLowerCase() + " | Deed Description: " + deedDescription.toLowerCase());
-            if (d.deedDescription.toLowerCase() === deedDescription.toLowerCase()) {
-                status = "Exists";
-                break;
-            }
-        }
-    } else {
-        deedsExist = false;
+    let user = req.session.user;                            // Get user from session.
+    let deedDescription = req.body.deedDescription;         // Get deed description that the user entered in the textbox.
+    let options = {                                         // Options to be passed to UI.
+        title: "User",
+        user: user,
+        deeds: []
     }
 
-    console.log("Status: " + status);
+    // Update deeds property with incomplete deeds.
+    options.deeds = await database.getIncompleteDeeds(user.username);                       
 
-    try {
-        if (status === "") {
-            await database.addDeed(user.username, deedDescription);
-            status = "Nonexistent";
-        }
+    // Check if deed entered by user already exists. Value is true or false.
+    options.deedAlreadyExists = deedsUtil.checkIfDeedExists(deedDescription, options.deeds);
 
-        let deeds = await database.getIncompleteDeeds(user.username);
-        console.log("DEEDS: \n" + JSON.stringify(deeds));
+    if (!options.deedAlreadyExists) {
+        await database.addDeed(user.username, deedDescription);                 // Add new deed to database.
+        options.deeds = await database.getIncompleteDeeds(user.username);       // Update deeds property with all incomplete deeds.
         
-        deed = deeds[0].deedDescription;
-        req.session.currentDeedIndex = 0;
-        req.session.deeds = deeds;
-
-        console.log(deeds.length);
-        moreThanOneDeed = deeds.length > 1 ? true : false;
-        console.log(moreThanOneDeed);
-        req.session.moreThanOneDeed = moreThanOneDeed;
-        
-    } catch (ex) {
-        status = "Error";
+        req.session.currentDeedIndex = 0;                                       // Allows for skip functionality to work.
+        req.session.deeds = options.deeds;                                      // Adds deeds to session.
     }
-    
-    res.render("user", 
-    { 
-        title: "User", 
-        user: user, 
-        message: "",
-        deed: deed,
-        moreThanOneDeed: moreThanOneDeed,
-        status: status,
-        deedsExist: deedsExist
-    });
+
+    res.render("user", options);                                                // Sends to user page.
 });
 
-module.exports = router;
+module.exports = router;                                                        // Allows router object to be used by app.js.

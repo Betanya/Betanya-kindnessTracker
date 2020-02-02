@@ -1,44 +1,30 @@
 // indexRouter.js - Index route module.
 
+// Dependencies
 var express = require('express');
 var router = express.Router();
 var database = require("../data/database.js");
-var deedsUtil = require("../util/deeds.js");
 
-router.get('', async function (req, res) {
-    console.log("Inside index router.get");
-
+// Requests to domain, domain/index). The default router when user goes to site.
+router.get(['', '/index'], async function (req, res) {
     let user = req.session.user;
-    let deed = "";
 
     if (user === undefined) {
-        res.render("index", { title: "Index"});
+        res.render("index", { title: "Index" });                                // Redirects to index page for login.
     } else {
-        let deeds = await database.getIncompleteDeeds(user.username);
+        let options = {                                                         // Options to be passed to UI.
+            title: "User",
+            user: user,
+            deeds: []
+        }
 
-        if (deeds === undefined) {
-            deed = "You have completed all your deeds!";
-            res.render("user", 
-            { 
-                title: "User", 
-                user: user,
-                deed: deed,
-                moreThanOneDeed: req.session.moreThanOneDeed,
-                deedsExist: false
-            });
-        } else {
-            deed = deeds[0].deedDescription;
-            req.session.currentDeedIndex = 0;
-            res.render("user", 
-            { 
-                title: "User", 
-                user: user,
-                deed: deed,
-                moreThanOneDeed: req.session.moreThanOneDeed,
-                deedsExist: true
-            });
-        }   
+        options.deeds = await database.getIncompleteDeeds(user.username);       // Update deeds property with all incomplete deeds.
+        
+        req.session.currentDeedIndex = 0;                                       // Allows for skip functionality to work.
+        req.session.deeds = options.deeds;                                      // Adds deeds to session.
+
+        res.render("user", options);                                            // Sends to user page.
     }
 })
 
-module.exports = router;
+module.exports = router;                                                        // Allows router object to be used by app.js.
