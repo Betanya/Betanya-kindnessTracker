@@ -1,12 +1,37 @@
+//- Uses the layout.pug file.
 extends layout
 
+//- Tells the layout.pug file where to put the below markup.
 block layout-content
     include nav
-    h1 Welcome, #{userProfile.nickname}!
-    p.mt-2 Clean their dishes
-    button(type="button" class="btn btn-light mt-2")
-        a(href="/complete") Deed complete!
-    button(type="button" class="btn btn-light mt-2")
-        a(href="/addDeed") Add New Deed
-    button(type="button" class="btn btn-light mt-2")
-        a(href="/skip") Skip
+    h1 Welcome, #{user.firstname}!
+
+    //- Checks if user has deeds and determines which deed or message to show based on current deed index (if any).
+    if deeds.length > 0
+        if deedIndex === undefined
+            p.mt-2 #{deeds[0].deedDescription}
+        else
+            p.mt-2 #{deeds[deedIndex].deedDescription}
+        a(href="/complete" class="btn btn-outline-primary" role="button") Deed completed
+    else
+        p.mt-2 You have completed all your deeds!
+
+        //- Disables "Deed completed" button if user does not have any deeds.
+        a(class="btn btn-outline-secondary disabled" role="button") Deed completed
+
+    //- Checks if user has more than one deed to determine if the skip button should be available.
+    if deeds.length > 1
+        a(href="/skip" class="btn btn-outline-primary ml-2" role="button") Skip
+    else
+        //- Disables "Skip" button when user has less than or equal to 1 deed.
+        a(class="btn btn-outline-secondary ml-2 disabled" role="button") Skip
+
+    a(href="/addDeed" class="btn btn-outline-primary ml-2" role="button") Add New Deed
+
+    //- Alert from server after user adds a new deed.
+    if deedAlreadyExists === true
+        script.
+            alert("Deed already exists!")
+    else if deedAlreadyExists === false
+        script.
+            alert("Deed added!")

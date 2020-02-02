@@ -4,14 +4,21 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon ./index.js",
-    "ui": "browser-sync start --proxy=localhost:8000 --files='**/*.css, **/*.pug, **/*.js' --ignore=node_modules --reload-delay 10 --no-ui --no-notify"
+    "dev": "nodemon ./app.js",
+    "ui": "browser-sync start --proxy=localhost:8000 --files='**/*.css, **/*.pug, **/*.js' --ignore=node_modules --reload-delay 10 --no-ui --no-notify",
+    "start": "NODE_ENV=production node ./app"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "aws-sdk": "^2.601.0",
+    "bcryptjs": "^2.4.3",
+    "compression": "^1.7.4",
+    "dynamodb-store": "^1.2.0",
     "express": "^4.17.1",
+    "express-session": "^1.17.0",
+    "helmet": "^3.21.2",
     "pug": "^2.0.4"
   },
   "devDependencies": {

@@ -1,18 +1,36 @@
+//- Uses the layout.pug file.
 extends layout
 
+//- Tells the layout.pug file where to put the below markup.
 block layout-content
     h1 Sign Up
+
+    //- On submit, goes to domain/signup.
     form(method="POST" action="signup")
-        label(for="firstname") First Name:
-        input#firstname(type="text" required placeholder="Enter first name...")
-        br
-        label(for="username") Username:
-        input#username(type="text" required placeholder="Enter username...")
-        br
-        label(for="password") Password:
-        input#password(type="password" required placeholder="Enter password...")
-        br
-        label(for="email") Email:
-        input#email(type="email" required placeholder="Enter email...")
-        br
-        input(type="submit" value="Sign Up")
+        div(class="form-group row")
+            label(for="username" class="col-sm-1 col-form-label") Username:
+            div(class="col-sm-3")
+                input#username(type="text" name="username" required placeholder="Enter username..." class="form-control")
+        div(class="form-group row")
+            label(for="email" class="col-sm-1 col-form-label") Email:
+            div(class="col-sm-3")
+                input#email(type="email" name="email" required placeholder="Enter email..." class="form-control")
+        div(class="form-group row")
+            label(for="firstname" class="col-sm-1 col-form-label") Firstname:
+            div(class="col-sm-3")
+                input#firstname(type="text" name="firstname" required placeholder="Enter firstname..." class="form-control")
+        div(class="form-group row")
+            label(for="lastname" class="col-sm-1 col-form-label") Lastname:
+            div(class="col-sm-3")
+                input#lastname(type="text" name="lastname" required placeholder="Enter lastname..." class="form-control")
+        div(class="form-group row")
+            label(for="password" class="col-sm-1 col-form-label") Password:
+            div(class="col-sm-3")
+                input#password(type="password" name="password" required placeholder="Enter password..." class="form-control")
+        input(type="submit" value="Sign Up" class="btn btn-primary")
+        a(href="/" class="btn btn-primary ml-2" role="button") Back
+
+    //- Alert for when server has a message for the user.
+    if message !== undefined
+        script.
+            alert("#{message}")

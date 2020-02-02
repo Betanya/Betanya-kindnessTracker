@@ -1,9 +1,16 @@
+//- Uses the layout.pug file.
 extends layout
 
+//- Tells the layout.pug file where to put the below markup.
 block layout-content
+
+    //- Includes the nav.pug file in the page.
     include nav
+
     h1 Add New Deed
+
+    //- On submit, goes to domain/addDeed.
     form(method="POST" action="addDeed")
-        input(type="text" id="kindDeed" placeholder="Kind Deed")
+        input(type="text" id="kindDeed" name="deedDescription" placeholder="Kind Deed" required)
         br
-        input(type="submit" value="Add" class="btn btn-light mt-2")
+        input(type="submit" value="Add" class="btn btn-primary mt-2")

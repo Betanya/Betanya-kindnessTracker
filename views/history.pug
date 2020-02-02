@@ -1,11 +1,60 @@
+//- Uses the layout.pug file.
 extends layout
 
+//- Tells the layout.pug file where to put the below markup.
 block layout-content
+
+	//- Add heatmap dependency scripts
 	script(type="text/javascript" src="//d3js.org/d3.v3.min.js")
 	script(src="cal-heatmap.min.js")
+
+	//- Add heatmap css
 	link(rel="stylesheet" type="text/css" href="cal-heatmap.css")
+
+	//- Includes the nav.pug file in the page.
 	include nav
+
 	h1 History of Kindness
 	p Heatmap of all the completed good deeds
-	div(id="cal-heatmap")
-	script(src="heatmap.js")
+
+	//- Div to hold heatmap
+	div(id="cal-heatmap" style="position:relative;" class="border border-primary")
+
+	//- Style tag for heatmap (got from cal-heatmap example and modified a little bit).
+	style(text="text/css").
+		#cal-heatmap .graph-label {
+			font-weight: bold;
+			font-size: 32px;
+			margin-top: 0px;
+		}
+
+		#cal-heatmap .subdomain-text {
+			font-color: black;
+		}
+
+	//- Buttons to move forwards and backwards on heatmap.
+	button(type="button" class="btn btn-outline-primary mt-3" id="heatmap-btn-previous") Back
+	button(type="button" class="btn btn-outline-primary mt-3 ml-2" id="heatmap-btn-next") Forward
+
+	//- Add script that creates heatmap
+	script.
+		// Creates cal-heatmap object.
+		var cal = new CalHeatMap();
+
+		// Initializes cal-heatmap object with specified data and options.
+		cal.init({
+			itemSelector: "#cal-heatmap",
+			domain: "month",
+			subDomain: "x_day",
+			data: "history?getData=yes",
+			start: new Date(),//.setMonth(new Date().getMonth() - 2), //new Date().setFullYear(new Date().getFullYear() - 1)),
+			cellSize: 40,
+			cellPadding: 5,
+			domainGutter: 20,
+			range: 1,
+			domainDynamicDimension: false,
+			previousSelector: "#heatmap-btn-previous",
+			nextSelector: "#heatmap-btn-next",
+			subDomainTextFormat: "%d",
+			legend: [20, 40, 60, 80]
+		});
