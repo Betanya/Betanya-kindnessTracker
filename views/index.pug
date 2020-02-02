@@ -1,7 +1,11 @@
+//- Uses the layout.pug file.
 extends layout
 
+//- Tells the layout.pug file where to put the below markup.
 block layout-content
     h1 Kindness Tracker
+
+    //- On submit, goes to domain/user.
     form(method="POST" action="user")
         div(class="form-group row")
             label(for="username" class="col-sm-1 col-form-label") Username:
@@ -14,5 +18,9 @@ block layout-content
         input(type="submit" value="Login" class="btn btn-primary")
     div
         p(class="mt-3") If you do not have an account, please go to the sign up page below:
-        form(method="GET" action="signup")
-            input(type="submit" value="Sign Up" class="btn btn-primary mb-2")
+        a(href="/signup" class="btn btn-primary mb-2" role="button") Sign Up
+    
+    //- Alert for when server has a message for the user.
+    if message !== undefined
+        script.
+            alert("#{message}");

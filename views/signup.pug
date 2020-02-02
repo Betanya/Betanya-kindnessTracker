@@ -1,7 +1,11 @@
+//- Uses the layout.pug file.
 extends layout
 
+//- Tells the layout.pug file where to put the below markup.
 block layout-content
     h1 Sign Up
+
+    //- On submit, goes to domain/signup.
     form(method="POST" action="signup")
         div(class="form-group row")
             label(for="username" class="col-sm-1 col-form-label") Username:
@@ -25,5 +29,8 @@ block layout-content
                 input#password(type="password" name="password" required placeholder="Enter password..." class="form-control")
         input(type="submit" value="Sign Up" class="btn btn-primary")
         a(href="/" class="btn btn-primary ml-2" role="button") Back
-    div
-        p #{message}
+
+    //- Alert for when server has a message for the user.
+    if message !== undefined
+        script.
+            alert("#{message}")
