@@ -10,7 +10,8 @@ const path = require("path");                                   // Use path npm 
 const session = require('express-session');                     // Use express-session npm module.
 const DynamoDBStore = require('dynamodb-store');                // Use dynamodb-store npm module.
 const access = require("./src/data/access.json");               // Use our access.json to get database login information
-
+const compression = require('compression');                     // Use compression npm module for http response compression.
+const helmet = require('helmet');                               // Use helmet npm module for http protection.
 
 /**
  * App Variables
@@ -24,6 +25,8 @@ const port = process.env.PORT || "8000";                        // Specify port 
  *  App Configuration
  */
 
+app.use(compression());                                         // Compress all routes.
+app.use(helmet());                                              // Protects app from well-known web vulnerabilities.
 app.use(
     // Creates a session middleware with given options.
     session({
@@ -62,7 +65,7 @@ app.use(
 
         // Secret key to sign the session ID. The signature is used
         // to validate the cookie against any tampering client-side.
-        secret: "a_random1234567890!$$$@#%^&secr3tc0d3!!!!",
+        secret: access.dynamodbStoreSessionSecret,
 
         // Settings object for the session ID cookie. The cookie holds a
         // session ID ref in the form of 's:{SESSION_ID}.{SIGNATURE}' for example:
