@@ -4,3 +4,7 @@ This is a web application that takes user input for kind things to do and prompt
 
 View here:
 http://kindnesstracker-env.advpmupvkm.us-east-1.elasticbeanstalk.com/
+
+Demo Login:
+Username: bethany.roberts
+Password: bethany
